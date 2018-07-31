@@ -1,22 +1,28 @@
 import requests
 from bs4 import BeautifulSoup
 data = []
+# search url input
 searchurl = raw_input('Enter search url: ')
 searchurl_get = requests.get(searchurl)
 soup1 = BeautifulSoup(searchurl_get.text, 'html.parser')
+# number of pages in search
 pagenumb = soup1.find_all('script')[7].text.split("\"")[8][1:-1]
+# for iteration purposes
 startpagefind = searchurl.split("&")
 for l in startpagefind:
 	if "page=" in l:
 		startpage = l
 
 for i in range(1, int(pagenumb)+1):
+	# iteration purposes continued
 	BBB = searchurl.replace(startpage, 'page={}', -1).format(i)
 	BBB_get = requests.get(BBB)
 	soup2 = BeautifulSoup(BBB_get.text, 'html.parser')
+	# finding subpages
 	suburlfind = soup2.find_all('script')[7].text.split("\"")
 	suburlref = soup2.find_all('script')[7].text.split("reportUrl")
 	for split in suburlfind:
+		# retrieving subpage
 		if suburlref[1][3:].split("reviews")[0] in split:
 			suburl = requests.get(split)
 			soup = BeautifulSoup(suburl.text, 'html.parser')
