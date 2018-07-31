@@ -1,14 +1,23 @@
 import requests
 from bs4 import BeautifulSoup
 data = []
-for i in range(1,16):
-	BBB = 'https://www.bbb.org/en/us/search?find_entity=10126-000&find_id=357_10126-000_alias&find_latlng=42.908480%2C-78.835104&find_loc=Buffalo%2C+NY&find_text=roofing&find_type=Category&page={}&sort=Distance'.format(i)
-	baseurl = requests.get(BBB)
-	soup1 = BeautifulSoup(baseurl.text, 'html.parser')
+searchurl = raw_input('Enter search url: ')
+searchurl_get = requests.get(searchurl)
+soup1 = BeautifulSoup(searchurl_get.text, 'html.parser')
+pagenumb = soup1.find_all('script')[7].text.split("\"")[8][1:-1]
+startpagefind = searchurl.split("&")
+for l in startpagefind:
+	if "page=" in l:
+		startpage = l
 
-	suburlfind = soup1.find_all('script')[7].text.split("\"")
+for i in range(1, int(pagenumb)+1):
+	BBB = searchurl.replace(startpage, 'page={}', -1).format(i)
+	BBB_get = requests.get(BBB)
+	soup2 = BeautifulSoup(BBB_get.text, 'html.parser')
+	suburlfind = soup2.find_all('script')[7].text.split("\"")
+	suburlref = soup2.find_all('script')[7].text.split("reportUrl")
 	for split in suburlfind:
-		if "https://www.bbb.org/upstate-new-york/business-reviews" in split:
+		if suburlref[1][3:].split("reviews")[0] in split:
 			suburl = requests.get(split)
 			soup = BeautifulSoup(suburl.text, 'html.parser')
 			# business name
